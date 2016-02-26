@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Axelrod lab 1</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+</head>
+<body>
+    <div id="vis"></div>
+
+    <script>
+        console.log(parseInt("1234abcd", 16) == 305441741);
+        console.log("00ff40: " + parseInt("00ff40", 16));
+
+        var vis = d3.select("#vis").append("svg")
+            .attr("width", 340)
+            .attr("height", 120);
+
+        vis.append("svg:rect")
+            .attr("id", "rect1")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 100)
+            .attr("height", 100)
+            .style("fill", "#00ff40");
+
+        vis.append("svg:rect")
+            .attr("id", "rect2")
+            .attr("x", 100)
+            .attr("y", 0)
+            .attr("width", 100)
+            .attr("height", 100)
+            .style("fill", "#cc0099");
+
+        vis.append("svg:rect")
+            .attr("id", "rect3")
+            .attr("x", 200)
+            .attr("y", 0)
+            .attr("width", 100)
+            .attr("height", 100)
+            .style("fill", function() { return halfDiff("43ff27", "cc0099") }); // ("00ff40", "cc0099") 
+
+        function addHexColor(c1, c2) {
+            var hexStr = (parseInt(c1, 16) + parseInt(c2, 16)).toString(16);
+            while (hexStr.length < 6) { hexStr = '0' + hexStr; } // Zero pad.
+            return hexStr;
+        }
+
+        // THIS DOESN'T WORK AS INTENDED. COLOR ALTERNATES BETWEEN CLOSE SIMILARITY AND BIG DIFFERENCE.
+        // NEED TO USE D3 transition instead. BUT, no D3 doesn't have a half way transition!
+        function halfDiff(c1, c2) {
+            var c1Int = (parseInt(c1, 16));
+            var c2Int = (parseInt(c2, 16));
+            var halfDiffInt = (c1Int > c2Int ? (c1Int - c2Int) / 2 : (c2Int - c1Int) / 2)
+            console.log("halfDiffInt: " + halfDiffInt);
+            var hexStr = Math.round(halfDiffInt).toString(16);
+            while (hexStr.length < 6) { hexStr = '0' + hexStr; } // Zero pad.
+            hexStr = '#' + hexStr;
+            console.log("hexStr: " + hexStr);
+            return hexStr;
+        }
+
+    </script>
+
+</body>
+</html>
