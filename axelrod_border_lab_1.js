@@ -143,24 +143,28 @@ function neighbors(cell) {
             cell.index[0] + dir[0], // x
             cell.index[1] + dir[1]  // y
         ];
-        console.log("neighborIndex: " + neighborIndex);
+        //console.log("neighborIndex: " + neighborIndex);
 
         if(gridContains(neighborIndex)) {
             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
-
-            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
-
+            console.log("neighbors, neighbor: " + JSON.stringify(neighbor[0][0].__data__));
             // Calculate similarity percentage
-            //percentSimilar(cell, neighbor);
+            var ptcSim = percentSimilar(cell, neighbor[0][0].__data__);
+            if(typeof mostSimilar === 'undefined' || ptcSim > mostSimilar) mostSimilar = ptcSim;
         }
     });
 }
 
 function percentSimilar(cell, neighbor) {
-    var similarity = 0;
+    var matchCount = 0;
     for(var i = 0; i < numFeatures; i++){
-        console.log(cell.features[i] == neighbor.features[i]);
+        //console.log("percentSimilar, neighbor: " + JSON.stringify(neighbor));
+        //console.log(cell.features[i] === neighbor.features[i]);
+        if(cell.features[i] === neighbor.features[i]) matchCount += 1;
     }
+    var similiarity = round(matchCount / numFeatures);
+    console.log("similiarity: " + similiarity);
+    return similiarity;
 }
 
 function gridContains(neighbor) {
@@ -174,6 +178,10 @@ function gridContains(neighbor) {
     return result;
 }
 
+function round(value) {
+    return Number(Math.round(value+'e'+2)+'e-'+2);
+}
+
 //**************************************************/
 
 // Grid dimensions
@@ -185,8 +193,8 @@ var gridSize = numRows * numCols;
 
 // Feature initialization. 
 // Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 4;
-var numTraits = 8;
+var numFeatures = 6;
+var numTraits = 12;
 
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
@@ -211,8 +219,9 @@ var timer;
 // Repeat cycle until equilibrium reached.
 timer = setInterval(function() {
     console.log("setInterval......");
-    adoptFeatures()
-}, 4000);
+    adoptFeatures();
+    clearInterval(timer); // TODO: NIX ##############
+}, 3000);
 
 
 
