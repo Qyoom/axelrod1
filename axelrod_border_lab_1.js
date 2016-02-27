@@ -88,9 +88,20 @@ function cellData() {
             // cell data
             data.push({
                 count: count,
+                index: [row, col],
+                id: 'r' + row + 'c' + col,
+                value: newValue,
                 x: xPos,
-                y: yPos
-                //features: featureData[count] // this should be in data only
+                y: yPos,
+                features: function() { 
+                    if(init) { // first time
+                        featureData[count];
+                        init = false; // TODO: Hack. Improve. 
+                    } 
+                    else { // thereafter
+
+                    }
+                }
             });
 
             xPos += stepX;
@@ -122,12 +133,12 @@ function initFeatures() {
     return featureData;
 }
 
-function adoptFeature(){
+function adoptFeatures(){
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly access featureData array.
     var newOrder = _.shuffle(_.range(gridSize)); 
     for(var i = 0; i < gridSize; i++){
-        neighbors(featureData[newOrder[i]]);
+        //neighbors(featureData[newOrder[i]]);
     }
 }
 
@@ -154,6 +165,8 @@ var directions = [
     [0, -1]  // west
 ];
 
+var init = true; // initFeatures; i.e. first time.
+
 //**** Starts here **************/
 var featureData = initFeatures(); // Initial feature set (random values)
 
@@ -164,7 +177,7 @@ var timer;
 // Repeat cycle until equilibrium reached.
 timer = setInterval(function() {
     console.log("setInterval......");
-
+    adoptFeatures()
 }, 2000);
 
 
