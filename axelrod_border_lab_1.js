@@ -20,7 +20,8 @@ function grid() {
             return d.count; // Bind by key, which is count (unique)
         })
       .enter().append("svg:g")
-        .attr("class", "cell");
+        .attr("class", "cell")
+        .attr("id", function(d) { return d.id; });
 
     // TOP
     cell.append("line")
@@ -133,10 +134,47 @@ function adoptFeatures(){
 }
 
 function neighbors(cell) {
-    console.log(cell.id);
+    console.log("neighbors, cell: " + JSON.stringify(cell));
+
+    var mostSimilar;
+    // loop all 4 directions
+    _.each(directions, function(dir) {
+        var neighborIndex = [
+            cell.index[0] + dir[0], // x
+            cell.index[1] + dir[1]  // y
+        ];
+        console.log("neighborIndex: " + neighborIndex);
+
+        if(gridContains(neighborIndex)) {
+            var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
+
+            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
+
+            // Calculate similarity percentage
+            //percentSimilar(cell, neighbor);
+        }
+    });
 }
 
-//*********************************/
+function percentSimilar(cell, neighbor) {
+    var similarity = 0;
+    for(var i = 0; i < numFeatures; i++){
+        console.log(cell.features[i] == neighbor.features[i]);
+    }
+}
+
+function gridContains(neighbor) {
+    result = true;
+    // test on range
+    if(
+        neighbor[0] < 0 || numRows <= neighbor[0] ||
+        neighbor[1] < 0 || numCols <= neighbor[1]
+    ) result = false;
+
+    return result;
+}
+
+//**************************************************/
 
 // Grid dimensions
 var anchorElement = '#grid';
