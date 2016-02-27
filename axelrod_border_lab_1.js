@@ -16,7 +16,7 @@ function grid() {
         .attr("transform", "translate(10, 10)");
 
     var cell = grid.selectAll(".cell")
-        .data(gridData, function (d) { 
+        .data(cellData, function (d) { 
             return d.count; // Bind by key, which is count (unique)
         })
       .enter().append("svg:g")
@@ -128,7 +128,7 @@ function adoptFeatures(){
     // Shuffling separate index array to randomly access featureData array.
     var newOrder = _.shuffle(_.range(gridSize)); 
     for(var i = 0; i < gridSize; i++){
-        //neighbors(featureData[newOrder[i]]);
+        //neighbors(cellData[newOrder[i]]);
     }
 }
 
@@ -160,12 +160,12 @@ var init = true; // initFeatures; i.e. first time.
 //**** Starts here **************/
 var featureData = initFeatures(); // Initial feature set (random values)
 
-var gridData = cellDataFun();
+var cellData = cellDataFun(); // Data in cell form with x and y postion
 
-grid();
+grid(); // Bind data to Dom, draw walls
 
+// Repeat cycle with local feature adoption
 var timer;
-
 // Repeat cycle until equilibrium reached.
 timer = setInterval(function() {
     console.log("setInterval......");
