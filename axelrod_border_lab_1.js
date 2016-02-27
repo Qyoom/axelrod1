@@ -66,6 +66,7 @@ function grid() {
 
 } // end grid
 
+// TODO: Follow General Update Pattern so that this function only runs once.
 function cellData() {
     var data = new Array();
 
@@ -88,8 +89,8 @@ function cellData() {
             data.push({
                 count: count,
                 x: xPos,
-                y: yPos,
-                features: featureData[count]
+                y: yPos
+                //features: featureData[count] // this should be in data only
             });
 
             xPos += stepX;
@@ -103,18 +104,8 @@ function cellData() {
     return data;
 } // end cellData
 
-// Grid dimensions
-var anchorElement = '#grid';
-var numCols = 15;
-var numRows = 15;
-var cellSize = 25;
-
-// Feature initialization. 
-// Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 4;
-var numTraits = 8;
-
-function genFeatureSet() {
+// Initialize feature set for one cell.
+function randomFeatures() {
     var features = [];
     for(var i = 0; i < numFeatures; i++){
         features[i] = Math.floor(Math.random() * numTraits);
@@ -122,17 +113,59 @@ function genFeatureSet() {
     return features;
 }
 
+// Initialize features for each cell in grid.
 function initFeatures() {
     var featureData = [];
-    for(var i = 0; i < numRows * numCols; i++){
-        featureData[i] = genFeatureSet();
+    for(var i = 0; i < gridSize; i++){
+        featureData[i] = randomFeatures();
     }
     return featureData;
 }
 
-// Starts here
-var featureData = initFeatures();
+function adoptFeature(){
+    // Randomization, no cell is favored.
+    // Shuffling separate index array to randomly access featureData array.
+    var newOrder = _.shuffle(_.range(gridSize)); 
+    for(var i = 0; i < gridSize; i++){
+        neighbors(featureData[newOrder[i]]);
+    }
+}
+
+//*********************************/
+
+// Grid dimensions
+var anchorElement = '#grid';
+var numCols = 15;
+var numRows = 15;
+var cellSize = 25;
+var gridSize = numRows * numCols;
+
+// Feature initialization. 
+// Ranges are 0 (inclusive) to N (exclusive).
+var numFeatures = 4;
+var numTraits = 8;
+
+// Assuming svg origin [0,0] as upper left.
+// [row, col] i.e. [horiz, vert]
+var directions = [
+    [0, 1],   // south
+    [1, 0],   // east
+    [-1, 0],  // north
+    [0, -1]  // west
+];
+
+//**** Starts here **************/
+var featureData = initFeatures(); // Initial feature set (random values)
+
 grid();
+
+var timer;
+
+// Repeat cycle until equilibrium reached.
+timer = setInterval(function() {
+    console.log("setInterval......");
+
+}, 2000);
 
 
 
