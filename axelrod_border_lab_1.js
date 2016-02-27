@@ -8,8 +8,6 @@ function grid() {
     var halfSize = cellSize / 2.0;
     var wallThickness = 4;
 
-    var gridData = cellData();
-
     var grid = d3.select(anchorElement).append("svg")
         .attr("width", width + marginHoriz)
         .attr("height", height + marginVert)
@@ -67,7 +65,7 @@ function grid() {
 } // end grid
 
 // TODO: Follow General Update Pattern so that this function only runs once.
-function cellData() {
+function cellDataFun() {
     var data = new Array();
 
     var startX = cellSize / 2;
@@ -93,15 +91,7 @@ function cellData() {
                 value: newValue,
                 x: xPos,
                 y: yPos,
-                features: function() { 
-                    if(init) { // first time
-                        featureData[count];
-                        init = false; // TODO: Hack. Improve. 
-                    } 
-                    else { // thereafter
-
-                    }
-                }
+                features: featureData[count] // Randomized feature adoption has already taken place (data is in original order)
             });
 
             xPos += stepX;
@@ -113,7 +103,7 @@ function cellData() {
     } // end row iterator
 
     return data;
-} // end cellData
+} // end cellDataFun
 
 // Initialize feature set for one cell.
 function randomFeatures() {
@@ -169,6 +159,8 @@ var init = true; // initFeatures; i.e. first time.
 
 //**** Starts here **************/
 var featureData = initFeatures(); // Initial feature set (random values)
+
+var gridData = cellDataFun();
 
 grid();
 
