@@ -6,6 +6,7 @@ function grid() {
     var width = numCols * cellSize;
     var height = numRows * cellSize;
     var halfSize = cellSize / 2.0;
+    var wallThickness = 4;
 
     var gridData = cellData();
 
@@ -26,7 +27,8 @@ function grid() {
     // TOP
     cell.append("line")
         .style("stroke", "black")
-        .style("stroke-width", 2)
+        .style("stroke-width", wallThickness)
+        .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
         .attr("y1", function(d) { return d.y - halfSize }) 
         .attr("x2", function(d) { return d.x + halfSize }) 
@@ -35,10 +37,31 @@ function grid() {
     // Left
     cell.append("line")
         .style("stroke", "black")
-        .style("stroke-width", 2)
+        .style("stroke-width", wallThickness)
+        .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
         .attr("y1", function(d) { return d.y - halfSize }) 
         .attr("x2", function(d) { return d.x - halfSize }) 
+        .attr("y2", function(d) { return d.y + halfSize });
+
+    // Bottom
+    cell.append("line")
+        .style("stroke", "black")
+        .style("stroke-width", wallThickness)
+        .style("stroke-linecap", "square")
+        .attr("x1", function(d) { return d.x - halfSize }) 
+        .attr("y1", function(d) { return d.y + halfSize }) 
+        .attr("x2", function(d) { return d.x + halfSize }) 
+        .attr("y2", function(d) { return d.y + halfSize });
+
+    // Right
+    cell.append("line")
+        .style("stroke", "black")
+        .style("stroke-width", wallThickness)
+        .style("stroke-linecap", "square")
+        .attr("x1", function(d) { return d.x + halfSize }) 
+        .attr("y1", function(d) { return d.y - halfSize }) 
+        .attr("x2", function(d) { return d.x + halfSize }) 
         .attr("y2", function(d) { return d.y + halfSize });
 
 } // end grid
@@ -80,9 +103,15 @@ function cellData() {
 } // end cellData
 
 var anchorElement = '#grid';
-var numCols = 10;
-var numRows = 5;
+var numCols = 15;
+var numRows = 15;
 var cellSize = 25;
 
 // Starts here
 grid();
+
+
+
+
+
+
