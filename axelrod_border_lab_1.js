@@ -1,19 +1,55 @@
 /** Axelrod border lab 1 *******************/
 
-function grid() {
-    var marginHoriz = 40;
-    var marginVert = 40;
-    var width = numCols * cellSize;
-    var height = numRows * cellSize;
-    var halfSize = cellSize / 2.0;
-    var wallThickness = 4;
+// Grid layout dimensions
+var anchorElement = '#grid';
+var numCols = 15;
+var numRows = 15;
+var cellSize = 25;
+var gridSize = numRows * numCols;
+var marginHoriz = 40;
+var marginVert = 40;
+var width = numCols * cellSize;
+var height = numRows * cellSize;
+var halfSize = cellSize / 2.0;
+var wallThickness = 4;
 
-    var grid = d3.select(anchorElement).append("svg")
+// Feature initialization. 
+// Ranges are 0 (inclusive) to N (exclusive).
+var numFeatures = 6;
+var numTraits = 12;
+
+// Assuming svg origin [0,0] as upper left.
+// [row, col] i.e. [horiz, vert]
+var directions = [
+    [0, 1],   // south
+    [1, 0],   // east
+    [-1, 0],  // north
+    [0, -1]  // west
+];
+
+//var init = true; // initFeatures; i.e. first time.
+
+var grid = d3.select(anchorElement).append("svg")
         .attr("width", width + marginHoriz)
         .attr("height", height + marginVert)
         .attr("class", "grid")
         .append("g")
         .attr("transform", "translate(10, 10)");
+
+function gridFun() {
+    // var marginHoriz = 40;
+    // var marginVert = 40;
+    // var width = numCols * cellSize;
+    // var height = numRows * cellSize;
+    // var halfSize = cellSize / 2.0;
+    // var wallThickness = 4;
+
+    // var grid = d3.select(anchorElement).append("svg")
+    //     .attr("width", width + marginHoriz)
+    //     .attr("height", height + marginVert)
+    //     .attr("class", "grid")
+    //     .append("g")
+    //     .attr("transform", "translate(10, 10)");
 
     var cell = grid.selectAll(".cell")
         .data(cellData, function (d) { 
@@ -209,35 +245,41 @@ function round(value) {
 
 //**************************************************/
 
-// Grid dimensions
-var anchorElement = '#grid';
-var numCols = 15;
-var numRows = 15;
-var cellSize = 25;
-var gridSize = numRows * numCols;
+// // Grid layout dimensions
+// var marginHoriz = 40;
+// var marginVert = 40;
+// var width = numCols * cellSize;
+// var height = numRows * cellSize;
+// var halfSize = cellSize / 2.0;
+// var wallThickness = 4;
+// var anchorElement = '#grid';
+// var numCols = 15;
+// var numRows = 15;
+// var cellSize = 25;
+// var gridSize = numRows * numCols;
 
-// Feature initialization. 
-// Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 6;
-var numTraits = 12;
+// // Feature initialization. 
+// // Ranges are 0 (inclusive) to N (exclusive).
+// var numFeatures = 6;
+// var numTraits = 12;
 
-// Assuming svg origin [0,0] as upper left.
-// [row, col] i.e. [horiz, vert]
-var directions = [
-    [0, 1],   // south
-    [1, 0],   // east
-    [-1, 0],  // north
-    [0, -1]  // west
-];
+// // Assuming svg origin [0,0] as upper left.
+// // [row, col] i.e. [horiz, vert]
+// var directions = [
+//     [0, 1],   // south
+//     [1, 0],   // east
+//     [-1, 0],  // north
+//     [0, -1]  // west
+// ];
 
-var init = true; // initFeatures; i.e. first time.
+// var init = true; // initFeatures; i.e. first time.
 
 //**** Starts here **************/
 var featureData = initFeatures(); // Initial feature set (random values)
 
 var cellData = cellDataFun(); // Data in cell form with x and y postion
 
-grid(); // Bind data to Dom, draw walls
+gridFun(); // Bind data to Dom, draw walls
 
 // Repeat cycle with local feature adoption
 var timer;
@@ -245,6 +287,7 @@ var timer;
 timer = setInterval(function() {
     console.log("setInterval......");
     cycleInfluence();
+    gridFun();
     clearInterval(timer); // TODO: NIX ##############
 }, 3000);
 
