@@ -5,25 +5,41 @@ function grid() {
     var marginVert = 40;
     var width = numCols * cellSize;
     var height = numRows * cellSize;
+    var halfSize = cellSize / 2.0;
 
     var gridData = cellData();
 
     var grid = d3.select(anchorElement).append("svg")
         .attr("width", width + marginHoriz)
         .attr("height", height + marginVert)
-        .attr("class", "grid");
+        .attr("class", "grid")
+        .append("g")
+        .attr("transform", "translate(10, 10)");
 
-    var cells = grid.selectAll(".cell")
-        .data(gridData, function (d) { return d.count; }) // Bind by key, which is count (unique).
-        // TODO: Going to change from this point downward...
-      .enter().append("svg:rect")
-        .attr("class", "cell")
-        .attr("x", function(d) { return d.x; })
-        .attr("y", function(d) { return d.y; })
-        .attr("width", cellSize)
-        .attr("height", cellSize)
-        .style("fill", '#FFF')
-        .style("stroke", '#555');
+    var cell = grid.selectAll(".cell")
+        .data(gridData, function (d) { 
+            return d.count; // Bind by key, which is count (unique)
+        })
+      .enter().append("svg:g")
+        .attr("class", "cell");
+
+    // TOP
+    cell.append("line")
+        .style("stroke", "black")
+        .style("stroke-width", 2)
+        .attr("x1", function(d) { return d.x - halfSize }) 
+        .attr("y1", function(d) { return d.y - halfSize }) 
+        .attr("x2", function(d) { return d.x + halfSize }) 
+        .attr("y2", function(d) { return d.y - halfSize });
+
+    // Left
+    cell.append("line")
+        .style("stroke", "black")
+        .style("stroke-width", 2)
+        .attr("x1", function(d) { return d.x - halfSize }) 
+        .attr("y1", function(d) { return d.y - halfSize }) 
+        .attr("x2", function(d) { return d.x - halfSize }) 
+        .attr("y2", function(d) { return d.y + halfSize });
 
 } // end grid
 
