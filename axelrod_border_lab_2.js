@@ -1,4 +1,4 @@
-/** Axelrod border lab 1 *******************/
+/** Axelrod border lab 2 *******************/
 
 // Grid layout dimensions
 var anchorElement = '#grid';
