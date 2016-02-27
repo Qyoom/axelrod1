@@ -128,8 +128,12 @@ function adoptFeatures(){
     // Shuffling separate index array to randomly access featureData array.
     var newOrder = _.shuffle(_.range(gridSize)); 
     for(var i = 0; i < gridSize; i++){
-        //neighbors(cellData[newOrder[i]]);
+        neighbors(cellData[newOrder[i]]);
     }
+}
+
+function neighbors(cell) {
+    console.log(cell.id);
 }
 
 //*********************************/
@@ -170,7 +174,7 @@ var timer;
 timer = setInterval(function() {
     console.log("setInterval......");
     adoptFeatures()
-}, 2000);
+}, 4000);
 
 
 
