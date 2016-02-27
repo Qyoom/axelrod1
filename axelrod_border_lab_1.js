@@ -88,7 +88,8 @@ function cellData() {
             data.push({
                 count: count,
                 x: xPos,
-                y: yPos
+                y: yPos,
+                features: featureData[count]
             });
 
             xPos += stepX;
@@ -102,12 +103,35 @@ function cellData() {
     return data;
 } // end cellData
 
+// Grid dimensions
 var anchorElement = '#grid';
 var numCols = 15;
 var numRows = 15;
 var cellSize = 25;
 
+// Feature initialization. 
+// Ranges are 0 (inclusive) to N (exclusive).
+var numFeatures = 4;
+var numTraits = 8;
+
+function genFeatureSet() {
+    var features = [];
+    for(var i = 0; i < numFeatures; i++){
+        features[i] = Math.floor(Math.random() * numTraits);
+    }
+    return features;
+}
+
+function initFeatures() {
+    var featureData = [];
+    for(var i = 0; i < numRows * numCols; i++){
+        featureData[i] = genFeatureSet();
+    }
+    return featureData;
+}
+
 // Starts here
+var featureData = initFeatures();
 grid();
 
 
