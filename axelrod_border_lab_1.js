@@ -150,7 +150,7 @@ function neighbors(cell) {
 
         if(gridContains(neighborIndex)) {
             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
-            neighbor = neighbor[0][0].__data__;
+            neighbor = neighbor[0][0].__data__; // TODO: Hack!
             console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
             // Calculate similarity percentage
             var ptcSim = percentSimilar(cell, neighbor);
@@ -175,6 +175,9 @@ function adoptFeature(cell, mostSimilar, highestPercentage) {
             unmatchedIndexes.push(i);
         }
     }
+    var randomIndex = Math.floor(Math.random() * unmatchedIndexes.length);
+    randomIndex = unmatchedIndexes[randomIndex];
+    cell.features[randomIndex] = mostSimilar.features[randomIndex];
 }
 
 function percentSimilar(cell, neighbor) {
