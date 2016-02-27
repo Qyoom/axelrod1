@@ -136,7 +136,7 @@ function adoptFeatures(){
 function neighbors(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
-    var mostSimilar;
+    var mostSimilar; // neighbor and similarity
     // loop all 4 directions
     _.each(directions, function(dir) {
         var neighborIndex = [
