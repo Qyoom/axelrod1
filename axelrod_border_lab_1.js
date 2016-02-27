@@ -124,7 +124,7 @@ function initFeatures() {
     return featureData;
 }
 
-function adoptFeatures(){
+function cycleInfluence(){
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly access featureData array.
     var newOrder = _.shuffle(_.range(gridSize)); 
@@ -136,9 +136,12 @@ function adoptFeatures(){
 function neighbors(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
-    var mostSimilar; // neighbor and similarity
-    // loop all 4 directions
-    _.each(directions, function(dir) {
+    // These two vars refer to same neighbor
+    var mostSimilar; // neighbor
+    var highestPercentage; // percentage
+
+    // Loop all 4 directions in random order. This disallows bias based on commonality of ties.
+    _.each(_.shuffle(directions), function(dir) {
         var neighborIndex = [
             cell.index[0] + dir[0], // x
             cell.index[1] + dir[1]  // y
@@ -147,12 +150,31 @@ function neighbors(cell) {
 
         if(gridContains(neighborIndex)) {
             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
-            console.log("neighbors, neighbor: " + JSON.stringify(neighbor[0][0].__data__));
+            neighbor = neighbor[0][0].__data__;
+            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
             // Calculate similarity percentage
-            var ptcSim = percentSimilar(cell, neighbor[0][0].__data__);
-            if(typeof mostSimilar === 'undefined' || ptcSim > mostSimilar) mostSimilar = ptcSim;
+            var ptcSim = percentSimilar(cell, neighbor);
+            if(typeof mostSimilar === 'undefined' || ptcSim > highestPercentage) {
+                highestPercentage = ptcSim;
+                mostSimilar = neighbor;
+            }
         }
     });
+
+    if(highestPercentage === 1) {
+        console.log("===> CELL FIXED: " + JSON.stringify(cell));
+        // TODO: ???????
+    }
+    else adoptFeature(cell, mostSimilar, highestPercentage);
+}
+
+function adoptFeature(cell, mostSimilar, highestPercentage) {
+    var unmatchedIndexes = [];
+    for(var i = 0; i < numFeatures; i++){
+        if(cell.features[i] !== mostSimilar.features[i]){
+            unmatchedIndexes.push(i);
+        }
+    }
 }
 
 function percentSimilar(cell, neighbor) {
@@ -219,7 +241,7 @@ var timer;
 // Repeat cycle until equilibrium reached.
 timer = setInterval(function() {
     console.log("setInterval......");
-    adoptFeatures();
+    cycleInfluence();
     clearInterval(timer); // TODO: NIX ##############
 }, 3000);
 
