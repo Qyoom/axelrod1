@@ -19,21 +19,21 @@ var numFeatures = 2;
 var numTraits = 2;
 
 // Assuming svg origin [0,0] as upper left.
-// [row, col] i.e. [horiz, vert]
+// [row, col] i.e. [vert, horiz]
 var directions = [
-    { "index": 0, "coord": [-1, 0] },  // north
-    { "index": 1, "coord": [0, -1] },  // west
-    { "index": 2, "coord": [0,  1] },  // south
-    { "index": 3, "coord": [1,  0] }   // east
+    { "index": 0, "coord": [-1, 0] },  // north (up)
+    { "index": 1, "coord": [ 0,-1] },  // west  (left)
+    { "index": 2, "coord": [ 1, 0] },  // south (down)
+    { "index": 3, "coord": [ 0, 1] }   // east  (right)
 ];
 
 // svg:g element
 var grid = d3.select(anchorElement).append("svg")
-        .attr("width", width + marginHoriz)
-        .attr("height", height + marginVert)
-        .attr("class", "grid")
-        .append("g")
-        .attr("transform", "translate(10, 10)");
+    .attr("width", width + marginHoriz)
+    .attr("height", height + marginVert)
+    .attr("class", "grid")
+    .append("g")
+    .attr("transform", "translate(10, 10)");
 
 function gridFun() {
 
@@ -70,9 +70,9 @@ function gridFun() {
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
-        .attr("y1", function(d) { return d.y - halfSize }) 
+        .attr("y1", function(d) { return d.y - halfSize + 2}) 
         .attr("x2", function(d) { return d.x + halfSize }) 
-        .attr("y2", function(d) { return d.y - halfSize });
+        .attr("y2", function(d) { return d.y - halfSize + 2 });
 
     // Left
     enterCell.append("line")
@@ -81,9 +81,9 @@ function gridFun() {
         .style("stroke-opacity", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x - halfSize }) 
+        .attr("x1", function(d) { return d.x - halfSize + 2}) 
         .attr("y1", function(d) { return d.y - halfSize }) 
-        .attr("x2", function(d) { return d.x - halfSize }) 
+        .attr("x2", function(d) { return d.x - halfSize + 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
     // Bottom
@@ -94,9 +94,9 @@ function gridFun() {
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
-        .attr("y1", function(d) { return d.y + halfSize }) 
+        .attr("y1", function(d) { return d.y + halfSize - 2}) 
         .attr("x2", function(d) { return d.x + halfSize }) 
-        .attr("y2", function(d) { return d.y + halfSize });
+        .attr("y2", function(d) { return d.y + halfSize - 2});
 
     // Right
     enterCell.append("line")
@@ -105,9 +105,9 @@ function gridFun() {
         .style("stroke-opacity", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x + halfSize }) 
+        .attr("x1", function(d) { return d.x + halfSize - 2}) 
         .attr("y1", function(d) { return d.y - halfSize }) 
-        .attr("x2", function(d) { return d.x + halfSize }) 
+        .attr("x2", function(d) { return d.x + halfSize - 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
     cell.exit().remove();
@@ -179,7 +179,7 @@ function initFeatures() {
 function cycleInfluence(){
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly process cells (feature similarity).
-    var randomCellOrder = _.shuffle(_.range(gridSize)); 
+    var randomCellOrder = _.range(gridSize);//EUGENE _.shuffle(_.range(gridSize)); 
     for(var i = 0; i < gridSize; i++){
         neighbors(cellData[randomCellOrder[i]]);
     }
@@ -195,7 +195,7 @@ function neighbors(cell) {
     var mostSimDir;
 
     // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
-    var randDirOrder = _.shuffle(_.range(directions.length));
+    var randDirOrder = _.range(directions.length);//EUGENE _.shuffle(_.range(directions.length));
     for(var i = 0; i < directions.length; i++) {
         var direction = directions[randDirOrder[i]];
 
