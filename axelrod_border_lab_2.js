@@ -21,10 +21,10 @@ var numTraits = 12;
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
 var directions = [
-    { "dir": "top",    "coord": [-1, 0] },  // top
-    { "dir": "left",   "coord": [0, -1] },  // left
-    { "dir": "bottom", "coord": [0,  1] },  // bottom
-    { "dir": "right",  "coord": [1,  0] }   // right
+    { "index": 0, "coord": [-1, 0] },  // top
+    { "index": 1, "coord": [0, -1] },  // left
+    { "index": 2, "coord": [0,  1] },  // bottom
+    { "index": 3, "coord": [1,  0] }   // right
 ];
 
 // svg:g element
@@ -37,16 +37,34 @@ var grid = d3.select(anchorElement).append("svg")
 
 function gridFun() {
 
+    //console.log("###> gridFun, cellData: " + JSON.stringify(cellData));
+
+    // Join data by key to <g> (.cell)
     var cell = grid.selectAll(".cell")
         .data(cellData, function (d) { 
             return d.count; // Bind by key, which is count (unique)
-        })
-      .enter().append("svg:g")
+        });
+
+    // UPDATE
+    cell.selectAll(".top")
+        .style("stroke-opacity", function(d) { return d.opacities[0]; });
+
+    cell.selectAll(".left")
+        .style("stroke-opacity", function(d) { return d.opacities[1]; });
+
+    cell.selectAll(".bottom")
+        .style("stroke-opacity", function(d) { return d.opacities[2]; });
+
+    cell.selectAll(".right")
+        .style("stroke-opacity", function(d) { return d.opacities[3]; });
+      
+    var enterCell = cell.enter().append("svg:g")
         .attr("class", "cell")
         .attr("id", function(d) { return d.id; });
 
     // TOP
-    cell.append("line")
+    enterCell.append("line")
+        .attr("class", "top")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
@@ -57,7 +75,8 @@ function gridFun() {
         .attr("y2", function(d) { return d.y - halfSize });
 
     // Left
-    cell.append("line")
+    enterCell.append("line")
+        .attr("class", "left")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
@@ -68,7 +87,8 @@ function gridFun() {
         .attr("y2", function(d) { return d.y + halfSize });
 
     // Bottom
-    cell.append("line")
+    enterCell.append("line")
+        .attr("class", "bottom")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[2]; })
         .style("stroke-width", wallThickness)
@@ -79,7 +99,8 @@ function gridFun() {
         .attr("y2", function(d) { return d.y + halfSize });
 
     // Right
-    cell.append("line")
+    enterCell.append("line")
+        .attr("class", "right")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
@@ -89,10 +110,14 @@ function gridFun() {
         .attr("x2", function(d) { return d.x + halfSize }) 
         .attr("y2", function(d) { return d.y + halfSize });
 
+    cell.exit().remove();
+
 } // end grid
 
 // This function only runs once at start.
 function cellDataFun() {
+    console.log("###> cellDataFun TOP");
+
     var data = new Array();
 
     var startX = cellSize / 2;
@@ -168,14 +193,14 @@ function neighbors(cell) {
     var mostSimilar; // neighbor
     var highestPercentage; // percentage
 
-    // Loop all 4 directions in random order. This disallows bias based on commonality of ties.
+    // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
     var randDirOrder = _.shuffle(_.range(directions.length));
-
-    //_.each(_.shuffle(directions), function(dir) {
     for(var i = 0; i < directions.length; i++) {
+        var direction = directions[randDirOrder[i]];
+
         var neighborIndex = [
-            cell.index[0] + directions[randDirOrder[i]].coord[0], // x
-            cell.index[1] + directions[randDirOrder[i]].coord[1]  // y
+            cell.index[0] + direction.coord[0], // x
+            cell.index[1] + direction.coord[1]  // y
         ];
         //console.log("neighborIndex: " + neighborIndex);
 
@@ -183,14 +208,18 @@ function neighbors(cell) {
             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
             neighbor = neighbor[0][0].__data__; // TODO: Hack!
             console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
+
             // Calculate similarity percentage
             var pctSim = percentSimilar(cell, neighbor);
+            // opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right]
+            cell.opacities[direction.index] = pctSim;
+
             if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
                 highestPercentage = pctSim;
                 mostSimilar = neighbor;
             }
         }
-    };
+    } // end loop of directions/neighbors
 
     if(highestPercentage === 1) {
         console.log("===> CELL FIXED: " + JSON.stringify(cell));
@@ -253,8 +282,8 @@ timer = setInterval(function() {
     console.log("setInterval......");
     cycleInfluence();
     gridFun();
-    //clearInterval(timer); // TODO: NIX ##############
-}, 1000);
+    clearInterval(timer); // TODO: NIX ##############
+}, 3000);
 
 
 
