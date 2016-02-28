@@ -21,10 +21,10 @@ var numTraits = 2;
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
 var directions = [
-    { "index": 0, "coord": [-1, 0] },  // top
-    { "index": 1, "coord": [0, -1] },  // left
-    { "index": 2, "coord": [0,  1] },  // bottom
-    { "index": 3, "coord": [1,  0] }   // right
+    { "index": 0, "coord": [-1, 0] },  // north
+    { "index": 1, "coord": [0, -1] },  // west
+    { "index": 2, "coord": [0,  1] },  // south
+    { "index": 3, "coord": [1,  0] }   // east
 ];
 
 // svg:g element
@@ -46,16 +46,16 @@ function gridFun() {
         });
 
     // UPDATE
-    cell.selectAll(".top")
+    cell.selectAll(".north")
         .style("stroke-opacity", function(d) { return d.opacities[0]; });
 
-    cell.selectAll(".left")
+    cell.selectAll(".west")
         .style("stroke-opacity", function(d) { return d.opacities[1]; });
 
-    cell.selectAll(".bottom")
+    cell.selectAll(".south")
         .style("stroke-opacity", function(d) { return d.opacities[2]; });
 
-    cell.selectAll(".right")
+    cell.selectAll(".east")
         .style("stroke-opacity", function(d) { return d.opacities[3]; });
       
     var enterCell = cell.enter().append("svg:g")
@@ -64,7 +64,7 @@ function gridFun() {
 
     // TOP
     enterCell.append("line")
-        .attr("class", "top")
+        .attr("class", "north")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
@@ -76,7 +76,7 @@ function gridFun() {
 
     // Left
     enterCell.append("line")
-        .attr("class", "left")
+        .attr("class", "west")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
@@ -88,7 +88,7 @@ function gridFun() {
 
     // Bottom
     enterCell.append("line")
-        .attr("class", "bottom")
+        .attr("class", "south")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[2]; })
         .style("stroke-width", wallThickness)
@@ -100,7 +100,7 @@ function gridFun() {
 
     // Right
     enterCell.append("line")
-        .attr("class", "right")
+        .attr("class", "east")
         .style("stroke", "black")
         .style("stroke-opacity", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
@@ -144,7 +144,7 @@ function cellDataFun() {
                 x: xPos,
                 y: yPos,
                 features: featureData[count], // Randomized feature adoption has already taken place (data is in original order)
-                opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right] TODO: This initialization of opacities does not acurately reflect similarity with neighbors.
+                opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east] TODO: This initialization of opacities does not acurately reflect similarity with neighbors.
             });
 
             xPos += stepX;
@@ -212,8 +212,12 @@ function neighbors(cell) {
 
             // Calculate similarity percentage
             var pctSim = percentSimilar(cell, neighbor);
-            // opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right]
+            // opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east]
             cell.opacities[direction.index] = round(1 - pctSim);
+            /* TODO: I think I also need to set the corresponding neighbor's wall
+               to 0 opacity (which is dangerous if there is a mixup!) because otherwise
+               the opacity of this cell's wall will alow that cell's wall to darken it! 
+               But then this is getting really complicated! */
 
             if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
                 highestPercentage = pctSim;
