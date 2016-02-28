@@ -171,10 +171,11 @@ function neighbors(cell) {
     // Loop all 4 directions in random order. This disallows bias based on commonality of ties.
     var randDirOrder = _.shuffle(_.range(directions.length));
 
-    _.each(_.shuffle(directions), function(dir) {
+    //_.each(_.shuffle(directions), function(dir) {
+    for(var i = 0; i < directions.length; i++) {
         var neighborIndex = [
-            cell.index[0] + dir.coord[0], // x
-            cell.index[1] + dir.coord[1]  // y
+            cell.index[0] + directions[randDirOrder[i]].coord[0], // x
+            cell.index[1] + directions[randDirOrder[i]].coord[1]  // y
         ];
         //console.log("neighborIndex: " + neighborIndex);
 
@@ -189,7 +190,7 @@ function neighbors(cell) {
                 mostSimilar = neighbor;
             }
         }
-    });
+    };
 
     if(highestPercentage === 1) {
         console.log("===> CELL FIXED: " + JSON.stringify(cell));
