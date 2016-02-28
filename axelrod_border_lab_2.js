@@ -2,8 +2,8 @@
 
 // Grid layout dimensions
 var anchorElement = '#grid';
-var numCols = 10;
-var numRows = 10;
+var numCols = 20;
+var numRows = 20;
 var cellSize = 25;
 var gridSize = numRows * numCols;
 var marginHoriz = 40;
@@ -15,8 +15,8 @@ var wallThickness = 4;
 
 // Feature initialization. 
 // Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 2;
-var numTraits = 2;
+var numFeatures = 5;
+var numTraits = 8;
 
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [vert, horiz]
@@ -179,7 +179,8 @@ function initFeatures() {
 function cycleInfluence(){
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly process cells (feature similarity).
-    var randomCellOrder = _.range(gridSize);//EUGENE _.shuffle(_.range(gridSize)); 
+    //var randomCellOrder = _.range(gridSize);//EUGENE _.shuffle(_.range(gridSize)); 
+    var randomCellOrder = _.shuffle(_.range(gridSize));
     for(var i = 0; i < gridSize; i++){
         neighbors(cellData[randomCellOrder[i]]);
     }
@@ -189,13 +190,14 @@ function cycleInfluence(){
 function neighbors(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
-    // These two vars refer to same neighbor
+    // These three vars refer to same neighbor
     var mostSimilar; // neighbor
     var highestPercentage; // percentage
-    var mostSimDir;
+    var mostSimDir; // direction
 
     // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
-    var randDirOrder = _.range(directions.length);//EUGENE _.shuffle(_.range(directions.length));
+    //var randDirOrder = _.range(directions.length);//EUGENE _.shuffle(_.range(directions.length));
+    var randDirOrder = _.shuffle(_.range(directions.length));
     for(var i = 0; i < directions.length; i++) {
         var direction = directions[randDirOrder[i]];
 
@@ -218,6 +220,9 @@ function neighbors(cell) {
                to 0 opacity (which is dangerous if there is a mixup!) because otherwise
                the opacity of this cell's wall will alow that cell's wall to darken it! 
                But then this is getting really complicated! */
+            /* But Eugene had another idea, which is probably better, which is to only
+               calculate two sides (north, west) of each cell. And then there the east
+               and south borders of the last row and col has to be a constant (1 opacity). */ 
 
             if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
                 highestPercentage = pctSim;
