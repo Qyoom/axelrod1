@@ -3,7 +3,7 @@
 // Grid layout dimensions
 var anchorElement = '#grid';
 var numCols = 10;
-var numRows = 5;
+var numRows = 10;
 var cellSize = 25;
 var gridSize = numRows * numCols;
 var marginHoriz = 40;
@@ -21,10 +21,10 @@ var numTraits = 12;
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
 var directions = [
-    [0, 1],   // south
-    [1, 0],   // east
-    [-1, 0],  // north
-    [0, -1]  // west
+    [-1, 0],  // top
+    [0, -1],  // left
+    [0, 1],   // bottom
+    [1, 0]    // right
 ];
 
 // svg:g element
@@ -48,6 +48,7 @@ function gridFun() {
     // TOP
     cell.append("line")
         .style("stroke", "black")
+        .style("stroke-opacity", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
@@ -58,6 +59,7 @@ function gridFun() {
     // Left
     cell.append("line")
         .style("stroke", "black")
+        .style("stroke-opacity", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
@@ -68,6 +70,7 @@ function gridFun() {
     // Bottom
     cell.append("line")
         .style("stroke", "black")
+        .style("stroke-opacity", function(d) { return d.opacities[2]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
@@ -78,6 +81,7 @@ function gridFun() {
     // Right
     cell.append("line")
         .style("stroke", "black")
+        .style("stroke-opacity", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x + halfSize }) 
@@ -87,7 +91,7 @@ function gridFun() {
 
 } // end grid
 
-// TODO: Follow General Update Pattern so that this function only runs once.
+// This function only runs once at start.
 function cellDataFun() {
     var data = new Array();
 
@@ -114,7 +118,8 @@ function cellDataFun() {
                 value: newValue,
                 x: xPos,
                 y: yPos,
-                features: featureData[count] // Randomized feature adoption has already taken place (data is in original order)
+                features: featureData[count], // Randomized feature adoption has already taken place (data is in original order)
+                opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right]
             });
 
             xPos += stepX;
@@ -155,6 +160,7 @@ function cycleInfluence(){
     }
 }
 
+// Writing data to all cells in cellData here.
 function neighbors(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
@@ -175,9 +181,9 @@ function neighbors(cell) {
             neighbor = neighbor[0][0].__data__; // TODO: Hack!
             console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
             // Calculate similarity percentage
-            var ptcSim = percentSimilar(cell, neighbor);
-            if(typeof mostSimilar === 'undefined' || ptcSim > highestPercentage) {
-                highestPercentage = ptcSim;
+            var pctSim = percentSimilar(cell, neighbor);
+            if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
+                highestPercentage = pctSim;
                 mostSimilar = neighbor;
             }
         }
@@ -188,7 +194,7 @@ function neighbors(cell) {
         // TODO: ???????
     }
     else adoptFeature(cell, mostSimilar, highestPercentage);
-}
+} // neighbors
 
 function adoptFeature(cell, mostSimilar, highestPercentage) {
     var unmatchedIndexes = [];
@@ -244,8 +250,8 @@ timer = setInterval(function() {
     console.log("setInterval......");
     cycleInfluence();
     gridFun();
-    clearInterval(timer); // TODO: NIX ##############
-}, 3000);
+    //clearInterval(timer); // TODO: NIX ##############
+}, 1000);
 
 
 
