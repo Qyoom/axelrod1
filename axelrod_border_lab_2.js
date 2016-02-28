@@ -15,8 +15,8 @@ var wallThickness = 4;
 
 // Feature initialization. 
 // Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 6;
-var numTraits = 12;
+var numFeatures = 2;
+var numTraits = 2;
 
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
@@ -192,6 +192,7 @@ function neighbors(cell) {
     // These two vars refer to same neighbor
     var mostSimilar; // neighbor
     var highestPercentage; // percentage
+    var mostSimDir;
 
     // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
     var randDirOrder = _.shuffle(_.range(directions.length));
@@ -212,11 +213,12 @@ function neighbors(cell) {
             // Calculate similarity percentage
             var pctSim = percentSimilar(cell, neighbor);
             // opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right]
-            cell.opacities[direction.index] = pctSim;
+            cell.opacities[direction.index] = round(1 - pctSim);
 
             if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
                 highestPercentage = pctSim;
                 mostSimilar = neighbor;
+                mostSimDir = direction;
             }
         }
     } // end loop of directions/neighbors
@@ -225,7 +227,13 @@ function neighbors(cell) {
         console.log("===> CELL FIXED: " + JSON.stringify(cell));
         // TODO: How to determine global equilibrium?
     }
-    else adoptFeature(cell, mostSimilar, highestPercentage);
+    // Cell feature is modified here. Update wall after feature adoption.
+    else {
+        adoptFeature(cell, mostSimilar, highestPercentage);
+        var pctSimMost = percentSimilar(cell, mostSimilar);
+        cell.opacities[mostSimDir.index] = round(1 - pctSimMost);
+    }
+
 } // neighbors
 
 function adoptFeature(cell, mostSimilar, highestPercentage) {
@@ -247,7 +255,7 @@ function percentSimilar(cell, neighbor) {
         //console.log(cell.features[i] === neighbor.features[i]);
         if(cell.features[i] === neighbor.features[i]) matchCount += 1;
     }
-    var similiarity = round(matchCount / numFeatures);
+    var similiarity = matchCount / numFeatures;
     console.log("similiarity: " + similiarity);
     return similiarity;
 }
@@ -282,8 +290,8 @@ timer = setInterval(function() {
     console.log("setInterval......");
     cycleInfluence();
     gridFun();
-    clearInterval(timer); // TODO: NIX ##############
-}, 3000);
+    //clearInterval(timer); // TODO: NIX ##############
+}, 1000);
 
 
 
