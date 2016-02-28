@@ -21,10 +21,10 @@ var numTraits = 12;
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [horiz, vert]
 var directions = [
-    [-1, 0],  // top
-    [0, -1],  // left
-    [0, 1],   // bottom
-    [1, 0]    // right
+    { "dir": "top",    "coord": [-1, 0] },  // top
+    { "dir": "left",   "coord": [0, -1] },  // left
+    { "dir": "bottom", "coord": [0,  1] },  // bottom
+    { "dir": "right",  "coord": [1,  0] }   // right
 ];
 
 // svg:g element
@@ -169,12 +169,12 @@ function neighbors(cell) {
     var highestPercentage; // percentage
 
     // Loop all 4 directions in random order. This disallows bias based on commonality of ties.
-    
-    
+    var randDirOrder = _.shuffle(_.range(directions.length));
+
     _.each(_.shuffle(directions), function(dir) {
         var neighborIndex = [
-            cell.index[0] + dir[0], // x
-            cell.index[1] + dir[1]  // y
+            cell.index[0] + dir.coord[0], // x
+            cell.index[1] + dir.coord[1]  // y
         ];
         //console.log("neighborIndex: " + neighborIndex);
 
