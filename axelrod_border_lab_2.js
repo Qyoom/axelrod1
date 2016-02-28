@@ -119,7 +119,7 @@ function cellDataFun() {
                 x: xPos,
                 y: yPos,
                 features: featureData[count], // Randomized feature adoption has already taken place (data is in original order)
-                opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right]
+                opacities: [1,1,1,1] // [0:top, 1:left, 2:bottom, 3:right] TODO: This initialization of opacities does not acurately reflect similarity with neighbors.
             });
 
             xPos += stepX;
@@ -153,10 +153,10 @@ function initFeatures() {
 
 function cycleInfluence(){
     // Randomization, no cell is favored.
-    // Shuffling separate index array to randomly access featureData array.
-    var newOrder = _.shuffle(_.range(gridSize)); 
+    // Shuffling separate index array to randomly process cells (feature similarity).
+    var randomCellOrder = _.shuffle(_.range(gridSize)); 
     for(var i = 0; i < gridSize; i++){
-        neighbors(cellData[newOrder[i]]);
+        neighbors(cellData[randomCellOrder[i]]);
     }
 }
 
@@ -169,6 +169,8 @@ function neighbors(cell) {
     var highestPercentage; // percentage
 
     // Loop all 4 directions in random order. This disallows bias based on commonality of ties.
+    
+    
     _.each(_.shuffle(directions), function(dir) {
         var neighborIndex = [
             cell.index[0] + dir[0], // x
@@ -191,7 +193,7 @@ function neighbors(cell) {
 
     if(highestPercentage === 1) {
         console.log("===> CELL FIXED: " + JSON.stringify(cell));
-        // TODO: ???????
+        // TODO: How to determine global equilibrium?
     }
     else adoptFeature(cell, mostSimilar, highestPercentage);
 } // neighbors
