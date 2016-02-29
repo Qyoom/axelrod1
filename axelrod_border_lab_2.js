@@ -2,8 +2,8 @@
 
 // Grid layout dimensions
 var anchorElement = '#grid';
+var numRows = 10;
 var numCols = 20;
-var numRows = 20;
 var cellSize = 25;
 var gridSize = numRows * numCols;
 var marginHoriz = 40;
@@ -42,7 +42,7 @@ function gridFun() {
     // Join data by key to <g> (.cell)
     var cell = grid.selectAll(".cell")
         .data(cellData, function (d) { 
-            return d.count; // Bind by key, which is count (unique)
+            return d.id; // Bind by key, which is id (unique)
         });
 
     // UPDATE
@@ -126,29 +126,26 @@ function cellDataFun() {
     var stepY = cellSize;
     var xPos = startX;
     var yPos = startY;
-    var count = 0;
     var newValue = 0;
 
-    // Row iterator
+    // Row iterator, y
     for (var row = 0; row < numRows; row++){
 
-        // Column/cell iterator
+        // Column/cell iterator, x
         for (var col = 0; col < numCols; col++){
 
             // cell data
             data.push({
-                count: count,
                 index: [row, col],
                 id: 'r' + row + 'c' + col,
                 value: newValue,
                 x: xPos,
                 y: yPos,
-                features: featureData[count], // Randomized feature adoption has already taken place (data is in original order)
-                opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east] TODO: This initialization of opacities does not acurately reflect similarity with neighbors.
+                features: randomFeatures(), // Randomized feature adoption has already taken place (data is in original order)
+                opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east] TODO: This initialization of wall shade does not acurately reflect similarity with neighbors.
             });
 
             xPos += stepX;
-            count += 1;
         } // end column iterator
 
         xPos = startX;
@@ -165,15 +162,6 @@ function randomFeatures() {
         features[i] = Math.floor(Math.random() * numTraits);
     }
     return features;
-}
-
-// Initialize features for each cell in grid.
-function initFeatures() {
-    var featureData = [];
-    for(var i = 0; i < gridSize; i++){
-        featureData[i] = randomFeatures();
-    }
-    return featureData;
 }
 
 function cycleInfluence(){
@@ -285,8 +273,6 @@ function round(value) {
 }
 
 //**** Starts here ***********************/
-
-var featureData = initFeatures(); // Initial feature set (random values)
 
 var cellData = cellDataFun(); // Data in cell form with x and y postion
 
