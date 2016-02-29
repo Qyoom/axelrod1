@@ -180,8 +180,39 @@ function cycleInfluence(){
     }
 }
 
-// Writing data to all cells in cellData here.
+// Modifies cell feature. Does not determine wall color on this pass.
 function neighbors(cell) {
+    console.log("neighbors, cell: " + JSON.stringify(cell));
+
+    var randDirOrder = _.shuffle(_.range(directions.length));
+    for(var i = 0; i < directions.length; i++) {
+        var direction = directions[randDirOrder[i]];
+
+        var neighborIndex = [
+            cell.index[0] + direction.coord[0], // x
+            cell.index[1] + direction.coord[1]  // y
+        ];
+
+        if(gridContains(neighborIndex)) {
+            var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
+            neighbor = neighbor[0][0].__data__; // TODO: Hack!
+            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
+
+            // Calculate similarity percentage
+            var pctSim = percentSimilar(cell, neighbor);
+            // Determine (probability based on similarity) if can interact.
+            if(Math.random <= pctSim) {
+                adoptFeature(cell, neighbor);
+            }
+            // else no interaction for this cell this cycle!
+            break; // Either way
+        }
+        // else continue with next direction since this direction not in grid.
+    } // end loop of directions/neighbors
+} // end function neighbors
+
+// Writing data to each cell in cellData here.
+function neighborsOLD(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
     // These three vars refer to same neighbor
@@ -190,7 +221,6 @@ function neighbors(cell) {
     var mostSimDir; // direction
 
     // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
-    //var randDirOrder = _.range(directions.length);//EUGENE _.shuffle(_.range(directions.length));
     var randDirOrder = _.shuffle(_.range(directions.length));
     for(var i = 0; i < directions.length; i++) {
         var direction = directions[randDirOrder[i]];
@@ -237,7 +267,7 @@ function neighbors(cell) {
         cell.opacities[mostSimDir.index] = round(1 - pctSimMost);
     }
 
-} // neighbors
+} // end neighbors OLD
 
 function wallColor(pctSim) {
     if     (pctSim > .8)                return "#FFFFFF";
@@ -248,16 +278,16 @@ function wallColor(pctSim) {
     else return "red";
 }
 
-function adoptFeature(cell, mostSimilar, highestPercentage) {
+function adoptFeature(cell, neighbor) {
     var unmatchedIndexes = [];
     for(var i = 0; i < numFeatures; i++){
-        if(cell.features[i] !== mostSimilar.features[i]){
+        if(cell.features[i] !== neighbor.features[i]){
             unmatchedIndexes.push(i);
         }
     }
     var randomIndex = Math.floor(Math.random() * unmatchedIndexes.length);
     randomIndex = unmatchedIndexes[randomIndex];
-    cell.features[randomIndex] = mostSimilar.features[randomIndex];
+    cell.features[randomIndex] = neighbor.features[randomIndex];
 }
 
 function percentSimilar(cell, neighbor) {
