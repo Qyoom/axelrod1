@@ -74,9 +74,9 @@ function gridFun() {
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
-        .attr("y1", function(d) { return d.y - halfSize + 2}) 
+        .attr("y1", function(d) { return d.y - halfSize })//+ 2}) 
         .attr("x2", function(d) { return d.x + halfSize }) 
-        .attr("y2", function(d) { return d.y - halfSize + 2 });
+        .attr("y2", function(d) { return d.y - halfSize });//+ 2 });
 
     // West, left
     enterCell.append("line")
@@ -84,9 +84,9 @@ function gridFun() {
         .style("stroke", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x - halfSize + 2}) 
+        .attr("x1", function(d) { return d.x - halfSize })//+ 2}) 
         .attr("y1", function(d) { return d.y - halfSize }) 
-        .attr("x2", function(d) { return d.x - halfSize + 2}) 
+        .attr("x2", function(d) { return d.x - halfSize })//+ 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
     // South, bottom
@@ -96,9 +96,9 @@ function gridFun() {
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
-        .attr("y1", function(d) { return d.y + halfSize - 2}) 
+        .attr("y1", function(d) { return d.y + halfSize })//- 2}) 
         .attr("x2", function(d) { return d.x + halfSize }) 
-        .attr("y2", function(d) { return d.y + halfSize - 2});
+        .attr("y2", function(d) { return d.y + halfSize });//- 2});
 
     // East, right
     enterCell.append("line")
@@ -106,9 +106,9 @@ function gridFun() {
         .style("stroke", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x + halfSize - 2}) 
+        .attr("x1", function(d) { return d.x + halfSize })//- 2}) 
         .attr("y1", function(d) { return d.y - halfSize }) 
-        .attr("x2", function(d) { return d.x + halfSize - 2}) 
+        .attr("x2", function(d) { return d.x + halfSize })//- 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
     cell.exit().remove();
