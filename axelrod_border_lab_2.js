@@ -15,16 +15,16 @@ var wallThickness = 4;
 
 // Feature initialization. 
 // Ranges are 0 (inclusive) to N (exclusive).
-var numFeatures = 5;
-var numTraits = 10;
+var numFeatures = 2;
+var numTraits = 2;
 
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [vert, horiz]
 var directions = [
     { "index": 0, "coord": [-1, 0] },  // north (up)
-    { "index": 1, "coord": [ 0,-1] }//,  // west  (left)
-    // { "index": 2, "coord": [ 1, 0] },  // south (down)
-    // { "index": 3, "coord": [ 0, 1] }   // east  (right)
+    { "index": 1, "coord": [ 0,-1] },  // west  (left)
+    { "index": 2, "coord": [ 1, 0] },  // south (down)
+    { "index": 3, "coord": [ 0, 1] }   // east  (right)
 ];
 
 // svg:g element
@@ -37,7 +37,7 @@ var grid = d3.select(anchorElement).append("svg")
 
 function gridFun() {
 
-    console.log("###> gridFun, cellData: " + JSON.stringify(cellData));
+    //console.log("###> gridFun, cellData: " + JSON.stringify(cellData));
 
     // Join data by key to <g> (.cell)
     var cell = grid.selectAll(".cell")
@@ -73,9 +73,9 @@ function gridFun() {
         .style("stroke", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x - halfSize }) 
+        .attr("x1", function(d) { return d.x - halfSize +4}) 
         .attr("y1", function(d) { return d.y - halfSize })//+ 2}) 
-        .attr("x2", function(d) { return d.x + halfSize }) 
+        .attr("x2", function(d) { return d.x + halfSize -4}) 
         .attr("y2", function(d) { return d.y - halfSize });//+ 2 });
 
     // West, left
@@ -85,9 +85,9 @@ function gridFun() {
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize })//+ 2}) 
-        .attr("y1", function(d) { return d.y - halfSize }) 
+        .attr("y1", function(d) { return d.y - halfSize + 4}) 
         .attr("x2", function(d) { return d.x - halfSize })//+ 2}) 
-        .attr("y2", function(d) { return d.y + halfSize });
+        .attr("y2", function(d) { return d.y + halfSize - 4});
 
     // // South, bottom
     // enterCell.append("line")
@@ -117,7 +117,7 @@ function gridFun() {
 
 // This function only runs once at start.
 function cellDataFun() {
-    console.log("###> cellDataFun TOP");
+    //console.log("###> cellDataFun TOP");
 
     var data = new Array();
 
@@ -171,7 +171,7 @@ function randomFeatures() {
 }
 
 function updateInfluence(){
-    console.log("###> updateInfulence, TOP");
+    //console.log("###> updateInfulence, TOP");
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly process cells (feature similarity).
     var randomCellOrder = _.shuffle(_.range(gridSize));
@@ -182,8 +182,9 @@ function updateInfluence(){
 
 // Modifies cell feature. Does not determine wall color on this pass.
 function interactNeighbor(cell) {
-    console.log("neighbors, cell: " + JSON.stringify(cell));
+    //console.log("interactNeighbor, cell: " + JSON.stringify(cell));
 
+    // Random iteration of all 4 directions
     var randDirOrder = _.shuffle(_.range(directions.length));
     for(var i = 0; i < directions.length; i++) {
         var direction = directions[randDirOrder[i]];
@@ -196,30 +197,33 @@ function interactNeighbor(cell) {
         if(gridContains(neighborIndex)) {
             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
             neighbor = neighbor[0][0].__data__; // TODO: Hack!
-            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
+            //console.log("interactNeighbor, neighbor: " + JSON.stringify(neighbor));
 
             // Calculate similarity percentage
             var pctSim = percentSimilar(cell, neighbor);
+            var prob = Math.random();
+            //console.log("interactNeighbor, prob: " + prob + ", pctSim: " + pctSim);
+
             // Determine (probability based on similarity) if can interact.
-            if(Math.random <= pctSim) {
+            if(prob <= pctSim) { // && pctSim < 1) {
                 adoptFeature(cell, neighbor);
             }
             // else no interaction for this cell this cycle!
-            break; // Either way
+            return; // Either way
         }
         // else continue with next direction since this direction not in grid.
     } // end loop of directions/neighbors
 } // end function neighbors
 
 function updateWalls() {
-     console.log("###> updateWalls, TOP");
+     //console.log("###> updateWalls, TOP");
      // for each cell...
      for(var i = 0; i < gridSize; i++) {
          var cell = cellData[i];
-         console.log("updateWalls, cell: " + JSON.stringify(cell));
+         //console.log("updateWalls, cell: " + JSON.stringify(cell));
 
-         // for each direction, i.e. north and west only...
-         for(var j = 0; j < directions.length; j++) {
+         // for north and west only...
+         for(var j = 0; j < directions.length / 2; j++) {
             var direction = directions[j];
             //console.log("updateWalls, direction: " + JSON.stringify(direction));
 
@@ -227,12 +231,21 @@ function updateWalls() {
                 cell.index[0] + direction.coord[0], // x
                 cell.index[1] + direction.coord[1]  // y
             ];
-            console.log("updateWalls, neighborIndex: " + JSON.stringify(neighborIndex));
+            //console.log("updateWalls, neighborIndex: " + JSON.stringify(neighborIndex));
 
             if(gridContains(neighborIndex)) {
-                console.log("updateWalls, grind contains neighborIndex? " + true);
+                //console.log("updateWalls, grind contains neighborIndex? " + true);
+                var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
+                neighbor = neighbor[0][0].__data__; // TODO: Hack!
+                //console.log("updateWalls, neighbor: " + JSON.stringify(neighbor));
+
+                // Calculate similarity percentage
+                var pctSim = percentSimilar(cell, neighbor);
+                //console.log("updateWalls, pctSim: " + pctSim);
+
+                // opacities: [0:north, 1:west, 2:south, 3:east]
+                cell.opacities[direction.index] = wallColor(pctSim);
             }
-            else console.log("updateWalls, grind contains neighborIndex? " + false);
          } // end loop each direction
      } // end loop each cell
 }
@@ -290,12 +303,21 @@ function updateWalls() {
 // } // end neighbors OLD
 
 function wallColor(pctSim) {
-    if     (pctSim > .8)                return "#FFFFFF";
+/*    
+    if     (pctSim > .8)                 return "#FFFFFF";
     else if(pctSim > .6 && pctSim <= .8) return "#BFBFBF";
     else if(pctSim > .4 && pctSim <= .6) return "#808080";
     else if(pctSim > .2 && pctSim <= .4) return "#404040";
     else if(pctSim >= 0 && pctSim <= .2) return "#000000";
     else return "red";
+*/
+    //if(pctSim < 1e-5)
+        //return '#FF00FF';
+
+    var color = Math.round(pctSim * 255);
+    var color_str = color.toString(16);
+    if( color < 16) color_str = '0' + color_str;
+    return '#' + color_str + color_str + color_str;    
 }
 
 function adoptFeature(cell, neighbor) {
@@ -318,7 +340,7 @@ function percentSimilar(cell, neighbor) {
         if(cell.features[i] === neighbor.features[i]) matchCount += 1;
     }
     var similiarity = round(matchCount / numFeatures);
-    console.log("similiarity: " + similiarity);
+    //console.log("similiarity: " + similiarity);
     return similiarity;
 }
 
@@ -334,7 +356,8 @@ function gridContains(neighbor) {
 }
 
 function round(value) {
-    return Number(Math.round(value+'e'+2)+'e-'+2);
+    //return Number(Math.round(value+'e'+2)+'e-'+2);
+    return Math.round(value*100)/100;
 }
 
 //**** Starts here ***********************/
@@ -348,13 +371,13 @@ var timer;
 // Repeat cycle until equilibrium reached.
 var timerCnt = 0;
 timer = setInterval(function() {
-    console.log("setInterval......");
+    if(timerCnt % 10 == 0) console.log("setInterval, timerCnt: " + timerCnt);
     updateInfluence();
     updateWalls();
-    // gridFun();
+    gridFun();
     timerCnt += 1;
-    if(timerCnt > 0) clearInterval(timer); // TODO: NIX ##############
-}, 1000);
+    if(timerCnt > 5000) clearInterval(timer); // TODO: NIX ##############
+}, 50);
 
 
 
