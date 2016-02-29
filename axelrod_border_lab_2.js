@@ -2,8 +2,8 @@
 
 // Grid layout dimensions
 var anchorElement = '#grid';
-var numRows = 20;
-var numCols = 20;
+var numRows = 10;
+var numCols = 10;
 var cellSize = 25;
 var gridSize = numRows * numCols;
 var marginHoriz = 40;
@@ -22,9 +22,9 @@ var numTraits = 10;
 // [row, col] i.e. [vert, horiz]
 var directions = [
     { "index": 0, "coord": [-1, 0] },  // north (up)
-    { "index": 1, "coord": [ 0,-1] },  // west  (left)
-    { "index": 2, "coord": [ 1, 0] },  // south (down)
-    { "index": 3, "coord": [ 0, 1] }   // east  (right)
+    { "index": 1, "coord": [ 0,-1] }//,  // west  (left)
+    // { "index": 2, "coord": [ 1, 0] },  // south (down)
+    // { "index": 3, "coord": [ 0, 1] }   // east  (right)
 ];
 
 // svg:g element
@@ -37,7 +37,7 @@ var grid = d3.select(anchorElement).append("svg")
 
 function gridFun() {
 
-    //console.log("###> gridFun, cellData: " + JSON.stringify(cellData));
+    console.log("###> gridFun, cellData: " + JSON.stringify(cellData));
 
     // Join data by key to <g> (.cell)
     var cell = grid.selectAll(".cell")
@@ -54,13 +54,13 @@ function gridFun() {
         .style("stroke", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness);
 
-    cell.selectAll(".south")
-        .style("stroke", function(d) { return d.opacities[2]; })
-        .style("stroke-width", wallThickness);
+    // cell.selectAll(".south")
+    //     .style("stroke", function(d) { return d.opacities[2]; })
+    //     .style("stroke-width", wallThickness);
 
-    cell.selectAll(".east")
-        .style("stroke", function(d) { return d.opacities[3]; })
-        .style("stroke-width", wallThickness);
+    // cell.selectAll(".east")
+    //     .style("stroke", function(d) { return d.opacities[3]; })
+    //     .style("stroke-width", wallThickness);
 
     // ENTER happens just once at the beginning.
     var enterCell = cell.enter().append("svg:g")
@@ -89,27 +89,27 @@ function gridFun() {
         .attr("x2", function(d) { return d.x - halfSize })//+ 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
-    // South, bottom
-    enterCell.append("line")
-        .attr("class", "south")
-        .style("stroke", function(d) { return d.opacities[2]; })
-        .style("stroke-width", wallThickness)
-        .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x - halfSize }) 
-        .attr("y1", function(d) { return d.y + halfSize })//- 2}) 
-        .attr("x2", function(d) { return d.x + halfSize }) 
-        .attr("y2", function(d) { return d.y + halfSize });//- 2});
+    // // South, bottom
+    // enterCell.append("line")
+    //     .attr("class", "south")
+    //     .style("stroke", function(d) { return d.opacities[2]; })
+    //     .style("stroke-width", wallThickness)
+    //     .style("stroke-linecap", "square")
+    //     .attr("x1", function(d) { return d.x - halfSize }) 
+    //     .attr("y1", function(d) { return d.y + halfSize })//- 2}) 
+    //     .attr("x2", function(d) { return d.x + halfSize }) 
+    //     .attr("y2", function(d) { return d.y + halfSize });//- 2});
 
-    // East, right
-    enterCell.append("line")
-        .attr("class", "east")
-        .style("stroke", function(d) { return d.opacities[3]; })
-        .style("stroke-width", wallThickness)
-        .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x + halfSize })//- 2}) 
-        .attr("y1", function(d) { return d.y - halfSize }) 
-        .attr("x2", function(d) { return d.x + halfSize })//- 2}) 
-        .attr("y2", function(d) { return d.y + halfSize });
+    // // East, right
+    // enterCell.append("line")
+    //     .attr("class", "east")
+    //     .style("stroke", function(d) { return d.opacities[3]; })
+    //     .style("stroke-width", wallThickness)
+    //     .style("stroke-linecap", "square")
+    //     .attr("x1", function(d) { return d.x + halfSize })//- 2}) 
+    //     .attr("y1", function(d) { return d.y - halfSize }) 
+    //     .attr("x2", function(d) { return d.x + halfSize })//- 2}) 
+    //     .attr("y2", function(d) { return d.y + halfSize });
 
     cell.exit().remove();
 
@@ -170,18 +170,18 @@ function randomFeatures() {
     return features;
 }
 
-function cycleInfluence(){
+function updateInfluence(){
+    console.log("###> updateInfulence, TOP");
     // Randomization, no cell is favored.
     // Shuffling separate index array to randomly process cells (feature similarity).
-    //var randomCellOrder = _.range(gridSize);//EUGENE _.shuffle(_.range(gridSize)); 
     var randomCellOrder = _.shuffle(_.range(gridSize));
     for(var i = 0; i < gridSize; i++){
-        neighbors(cellData[randomCellOrder[i]]);
+        interactNeighbor(cellData[randomCellOrder[i]]);
     }
 }
 
 // Modifies cell feature. Does not determine wall color on this pass.
-function neighbors(cell) {
+function interactNeighbor(cell) {
     console.log("neighbors, cell: " + JSON.stringify(cell));
 
     var randDirOrder = _.shuffle(_.range(directions.length));
@@ -211,63 +211,83 @@ function neighbors(cell) {
     } // end loop of directions/neighbors
 } // end function neighbors
 
-// Writing data to each cell in cellData here.
-function neighborsOLD(cell) {
-    console.log("neighbors, cell: " + JSON.stringify(cell));
+function updateWalls() {
+     console.log("###> updateWalls, TOP");
+     // for each cell...
+     for(var i = 0; i < gridSize; i++) {
+         var cell = cellData[i];
+         console.log("updateWalls, cell: " + JSON.stringify(cell));
 
-    // These three vars refer to same neighbor
-    var mostSimilar; // neighbor
-    var highestPercentage; // percentage
-    var mostSimDir; // direction
+         // for each direction, i.e. north and west only...
+         for(var j = 0; j < directions.length; j++) {
+            var direction = directions[j];
+            //console.log("updateWalls, direction: " + JSON.stringify(direction));
 
-    // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
-    var randDirOrder = _.shuffle(_.range(directions.length));
-    for(var i = 0; i < directions.length; i++) {
-        var direction = directions[randDirOrder[i]];
+            var neighborIndex = [
+                cell.index[0] + direction.coord[0], // x
+                cell.index[1] + direction.coord[1]  // y
+            ];
+            console.log("updateWalls, neighborIndex: " + JSON.stringify(neighborIndex));
 
-        var neighborIndex = [
-            cell.index[0] + direction.coord[0], // x
-            cell.index[1] + direction.coord[1]  // y
-        ];
-        //console.log("neighborIndex: " + neighborIndex);
-
-        if(gridContains(neighborIndex)) {
-            var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
-            neighbor = neighbor[0][0].__data__; // TODO: Hack!
-            console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
-
-            // Calculate similarity percentage
-            var pctSim = percentSimilar(cell, neighbor);
-            // opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east]
-            cell.opacities[direction.index] = wallColor(pctSim);
-            /* TODO: I think I also need to set the corresponding neighbor's wall
-               to 0 opacity (which is dangerous if there is a mixup!) because otherwise
-               the opacity of this cell's wall will alow that cell's wall to darken it! 
-               But then this is getting really complicated! */
-            /* But Eugene had another idea, which is probably better, which is to only
-               calculate two sides (north, west) of each cell. And then there the east
-               and south borders of the last row and col has to be a constant (1 opacity). */ 
-
-            if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
-                highestPercentage = pctSim;
-                mostSimilar = neighbor;
-                mostSimDir = direction;
+            if(gridContains(neighborIndex)) {
+                console.log("updateWalls, grind contains neighborIndex? " + true);
             }
-        }
-    } // end loop of directions/neighbors
+            else console.log("updateWalls, grind contains neighborIndex? " + false);
+         } // end loop each direction
+     } // end loop each cell
+}
 
-    if(highestPercentage === 1) {
-        console.log("===> CELL FIXED: " + JSON.stringify(cell));
-        // TODO: How to determine global equilibrium?
-    }
-    // Cell feature is modified here. Update wall after feature adoption.
-    else {
-        adoptFeature(cell, mostSimilar, highestPercentage);
-        var pctSimMost = percentSimilar(cell, mostSimilar);
-        cell.opacities[mostSimDir.index] = round(1 - pctSimMost);
-    }
+// Writing data to each cell in cellData here.
+// function neighborsOLD(cell) {
+//     console.log("neighbors, cell: " + JSON.stringify(cell));
 
-} // end neighbors OLD
+//     // These three vars refer to same neighbor
+//     var mostSimilar; // neighbor
+//     var highestPercentage; // percentage
+//     var mostSimDir; // direction
+
+//     // Loop all 4 directions/neighbors in random order. This negates bias based on commonality of ties.
+//     var randDirOrder = _.shuffle(_.range(directions.length));
+//     for(var i = 0; i < directions.length; i++) {
+//         var direction = directions[randDirOrder[i]];
+
+//         var neighborIndex = [
+//             cell.index[0] + direction.coord[0], // x
+//             cell.index[1] + direction.coord[1]  // y
+//         ];
+//         //console.log("neighborIndex: " + neighborIndex);
+
+//         if(gridContains(neighborIndex)) {
+//             var neighbor = d3.select("#r" + neighborIndex[0] + "c" + neighborIndex[1]);
+//             neighbor = neighbor[0][0].__data__; // TODO: Hack!
+//             console.log("neighbors, neighbor: " + JSON.stringify(neighbor));
+
+//             // Calculate similarity percentage
+//             var pctSim = percentSimilar(cell, neighbor);
+//             // opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east]
+//             cell.opacities[direction.index] = wallColor(pctSim);
+ 
+
+//             if(typeof mostSimilar === 'undefined' || pctSim > highestPercentage) {
+//                 highestPercentage = pctSim;
+//                 mostSimilar = neighbor;
+//                 mostSimDir = direction;
+//             }
+//         }
+//     } // end loop of directions/neighbors
+
+//     if(highestPercentage === 1) {
+//         console.log("===> CELL FIXED: " + JSON.stringify(cell));
+//         // TODO: How to determine global equilibrium?
+//     }
+//     // Cell feature is modified here. Update wall after feature adoption.
+//     else {
+//         adoptFeature(cell, mostSimilar, highestPercentage);
+//         var pctSimMost = percentSimilar(cell, mostSimilar);
+//         cell.opacities[mostSimDir.index] = round(1 - pctSimMost);
+//     }
+
+// } // end neighbors OLD
 
 function wallColor(pctSim) {
     if     (pctSim > .8)                return "#FFFFFF";
@@ -329,10 +349,11 @@ var timer;
 var timerCnt = 0;
 timer = setInterval(function() {
     console.log("setInterval......");
-    cycleInfluence();
-    gridFun();
+    updateInfluence();
+    updateWalls();
+    // gridFun();
     timerCnt += 1;
-    if(timerCnt > 15) clearInterval(timer); // TODO: NIX ##############
+    if(timerCnt > 0) clearInterval(timer); // TODO: NIX ##############
 }, 1000);
 
 
