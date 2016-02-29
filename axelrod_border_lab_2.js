@@ -2,7 +2,7 @@
 
 // Grid layout dimensions
 var anchorElement = '#grid';
-var numRows = 10;
+var numRows = 20;
 var numCols = 20;
 var cellSize = 25;
 var gridSize = numRows * numCols;
@@ -16,7 +16,7 @@ var wallThickness = 4;
 // Feature initialization. 
 // Ranges are 0 (inclusive) to N (exclusive).
 var numFeatures = 5;
-var numTraits = 8;
+var numTraits = 10;
 
 // Assuming svg origin [0,0] as upper left.
 // [row, col] i.e. [vert, horiz]
@@ -47,26 +47,30 @@ function gridFun() {
 
     // UPDATE
     cell.selectAll(".north")
-        .style("stroke-opacity", function(d) { return d.opacities[0]; });
+        .style("stroke", function(d) { return d.opacities[0]; })
+        .style("stroke-width", wallThickness);
 
     cell.selectAll(".west")
-        .style("stroke-opacity", function(d) { return d.opacities[1]; });
+        .style("stroke", function(d) { return d.opacities[1]; })
+        .style("stroke-width", wallThickness);
 
     cell.selectAll(".south")
-        .style("stroke-opacity", function(d) { return d.opacities[2]; });
+        .style("stroke", function(d) { return d.opacities[2]; })
+        .style("stroke-width", wallThickness);
 
     cell.selectAll(".east")
-        .style("stroke-opacity", function(d) { return d.opacities[3]; });
-      
+        .style("stroke", function(d) { return d.opacities[3]; })
+        .style("stroke-width", wallThickness);
+
+    // ENTER happens just once at the beginning.
     var enterCell = cell.enter().append("svg:g")
         .attr("class", "cell")
         .attr("id", function(d) { return d.id; });
 
-    // TOP
+    // North, top
     enterCell.append("line")
         .attr("class", "north")
-        .style("stroke", "black")
-        .style("stroke-opacity", function(d) { return d.opacities[0]; })
+        .style("stroke", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
@@ -74,11 +78,10 @@ function gridFun() {
         .attr("x2", function(d) { return d.x + halfSize }) 
         .attr("y2", function(d) { return d.y - halfSize + 2 });
 
-    // Left
+    // West, left
     enterCell.append("line")
         .attr("class", "west")
-        .style("stroke", "black")
-        .style("stroke-opacity", function(d) { return d.opacities[1]; })
+        .style("stroke", function(d) { return d.opacities[1]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize + 2}) 
@@ -86,11 +89,10 @@ function gridFun() {
         .attr("x2", function(d) { return d.x - halfSize + 2}) 
         .attr("y2", function(d) { return d.y + halfSize });
 
-    // Bottom
+    // South, bottom
     enterCell.append("line")
         .attr("class", "south")
-        .style("stroke", "black")
-        .style("stroke-opacity", function(d) { return d.opacities[2]; })
+        .style("stroke", function(d) { return d.opacities[2]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x - halfSize }) 
@@ -98,11 +100,10 @@ function gridFun() {
         .attr("x2", function(d) { return d.x + halfSize }) 
         .attr("y2", function(d) { return d.y + halfSize - 2});
 
-    // Right
+    // East, right
     enterCell.append("line")
         .attr("class", "east")
-        .style("stroke", "black")
-        .style("stroke-opacity", function(d) { return d.opacities[3]; })
+        .style("stroke", function(d) { return d.opacities[3]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
         .attr("x1", function(d) { return d.x + halfSize - 2}) 
@@ -142,7 +143,12 @@ function cellDataFun() {
                 x: xPos,
                 y: yPos,
                 features: randomFeatures(), // Randomized feature adoption has already taken place (data is in original order)
-                opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east] TODO: This initialization of wall shade does not acurately reflect similarity with neighbors.
+                opacities: [ // [0:north, 1:west, 2:south, 3:east] TODO: This initialization of wall shade does not acurately reflect similarity with neighbors.
+                    "#000000",
+                    "#000000",
+                    "#000000",
+                    "#000000"
+                ]
             });
 
             xPos += stepX;
@@ -203,7 +209,7 @@ function neighbors(cell) {
             // Calculate similarity percentage
             var pctSim = percentSimilar(cell, neighbor);
             // opacities: [1,1,1,1] // [0:north, 1:west, 2:south, 3:east]
-            cell.opacities[direction.index] = round(1 - pctSim);
+            cell.opacities[direction.index] = wallColor(pctSim);
             /* TODO: I think I also need to set the corresponding neighbor's wall
                to 0 opacity (which is dangerous if there is a mixup!) because otherwise
                the opacity of this cell's wall will alow that cell's wall to darken it! 
@@ -233,6 +239,15 @@ function neighbors(cell) {
 
 } // neighbors
 
+function wallColor(pctSim) {
+    if     (pctSim > .8)                return "#FFFFFF";
+    else if(pctSim > .6 && pctSim <= .8) return "#BFBFBF";
+    else if(pctSim > .4 && pctSim <= .6) return "#808080";
+    else if(pctSim > .2 && pctSim <= .4) return "#404040";
+    else if(pctSim >= 0 && pctSim <= .2) return "#000000";
+    else return "red";
+}
+
 function adoptFeature(cell, mostSimilar, highestPercentage) {
     var unmatchedIndexes = [];
     for(var i = 0; i < numFeatures; i++){
@@ -252,7 +267,7 @@ function percentSimilar(cell, neighbor) {
         //console.log(cell.features[i] === neighbor.features[i]);
         if(cell.features[i] === neighbor.features[i]) matchCount += 1;
     }
-    var similiarity = matchCount / numFeatures;
+    var similiarity = round(matchCount / numFeatures);
     console.log("similiarity: " + similiarity);
     return similiarity;
 }
@@ -281,11 +296,13 @@ gridFun(); // Bind data to Dom, draw walls
 // Repeat cycle with local feature adoption
 var timer;
 // Repeat cycle until equilibrium reached.
+var timerCnt = 0;
 timer = setInterval(function() {
     console.log("setInterval......");
     cycleInfluence();
     gridFun();
-    //clearInterval(timer); // TODO: NIX ##############
+    timerCnt += 1;
+    if(timerCnt > 15) clearInterval(timer); // TODO: NIX ##############
 }, 1000);
 
 
