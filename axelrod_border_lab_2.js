@@ -1,4 +1,5 @@
 /** Axelrod border lab 2 *******************/
+// Static version. TODO: parameterize from UI.
 
 // Grid layout dimensions
 var anchorElement = '#grid';
@@ -35,6 +36,46 @@ var grid = d3.select(anchorElement).append("svg")
     .append("g")
     .attr("transform", "translate(10, 10)");
 
+// Grid top border
+grid.append("line")
+    .style("stroke", "#000000")
+    .style("stroke-width", wallThickness)
+    .style("stroke-linecap", "square")
+    .attr("x1", 0) 
+    .attr("y1", 0) 
+    .attr("x2", numCols * cellSize) 
+    .attr("y2", 0);
+
+// Grid left border
+grid.append("line")
+    .style("stroke", "#000000")
+    .style("stroke-width", wallThickness)
+    .style("stroke-linecap", "square")
+    .attr("x1", 0) 
+    .attr("y1", 0) 
+    .attr("x2", 0) 
+    .attr("y2", numRows * cellSize);
+
+// Grid bottom border
+grid.append("line")
+    .style("stroke", "#000000")
+    .style("stroke-width", wallThickness)
+    .style("stroke-linecap", "square")
+    .attr("x1", 0) 
+    .attr("y1", numRows * cellSize) 
+    .attr("x2", numCols * cellSize) 
+    .attr("y2", numRows * cellSize);
+
+// Grid right border
+grid.append("line")
+    .style("stroke", "#000000")
+    .style("stroke-width", wallThickness)
+    .style("stroke-linecap", "square")
+    .attr("x1", numCols * cellSize) 
+    .attr("y1", 0) 
+    .attr("x2", numCols * cellSize) 
+    .attr("y2", numRows * cellSize);
+
 function gridFun() {
     // Join data by key to <g> (.cell)
     var cell = grid.selectAll(".cell")
@@ -62,10 +103,10 @@ function gridFun() {
         .style("stroke", function(d) { return d.opacities[0]; })
         .style("stroke-width", wallThickness)
         .style("stroke-linecap", "square")
-        .attr("x1", function(d) { return d.x - halfSize +4}) 
-        .attr("y1", function(d) { return d.y - halfSize })//+ 2}) 
-        .attr("x2", function(d) { return d.x + halfSize -4}) 
-        .attr("y2", function(d) { return d.y - halfSize });//+ 2 });
+        .attr("x1", function(d) { return d.x - halfSize + 4}) 
+        .attr("y1", function(d) { return d.y - halfSize })
+        .attr("x2", function(d) { return d.x + halfSize - 4}) 
+        .attr("y2", function(d) { return d.y - halfSize });
 
     // West, left
     enterCell.append("line")
@@ -77,28 +118,6 @@ function gridFun() {
         .attr("y1", function(d) { return d.y - halfSize + 4}) 
         .attr("x2", function(d) { return d.x - halfSize })//+ 2}) 
         .attr("y2", function(d) { return d.y + halfSize - 4});
-
-    // // South, bottom
-    // enterCell.append("line")
-    //     .attr("class", "south")
-    //     .style("stroke", function(d) { return d.opacities[2]; })
-    //     .style("stroke-width", wallThickness)
-    //     .style("stroke-linecap", "square")
-    //     .attr("x1", function(d) { return d.x - halfSize }) 
-    //     .attr("y1", function(d) { return d.y + halfSize })//- 2}) 
-    //     .attr("x2", function(d) { return d.x + halfSize }) 
-    //     .attr("y2", function(d) { return d.y + halfSize });//- 2});
-
-    // // East, right
-    // enterCell.append("line")
-    //     .attr("class", "east")
-    //     .style("stroke", function(d) { return d.opacities[3]; })
-    //     .style("stroke-width", wallThickness)
-    //     .style("stroke-linecap", "square")
-    //     .attr("x1", function(d) { return d.x + halfSize })//- 2}) 
-    //     .attr("y1", function(d) { return d.y - halfSize }) 
-    //     .attr("x2", function(d) { return d.x + halfSize })//- 2}) 
-    //     .attr("y2", function(d) { return d.y + halfSize });
 
     cell.exit().remove();
 
@@ -166,7 +185,7 @@ function updateInfluence(){
     }
 }
 
-// Modifies cell feature. Does not determine wall color on this pass.
+// Potentially modifies cell feature.
 function interactNeighbor(cell) {
     // Random iteration of all 4 directions
     var randDirOrder = _.shuffle(_.range(directions.length));
@@ -183,20 +202,16 @@ function interactNeighbor(cell) {
             neighbor = neighbor[0][0].__data__; // TODO: Hack!
 
             // Calculate similarity percentage
-            //var pctSim = percentSimilar(cell, neighbor);
-            //var pctSim = Math.pow((percentSimilar(cell, neighbor)), 2.2);
             var pctSim = Math.pow((percentSimilar(cell, neighbor)), 2.7);
-            //var pctSim = Math.pow((percentSimilar(cell, neighbor)), 3);
 
             // Generate random probability
             var prob = Math.random();
 
             // Determine (probability based on similarity) if can interact.
-            //if(prob <= pctSim) { // && pctSim < 1) {
             if(prob <= pctSim && pctSim < 1) {
                 adoptFeature(cell, neighbor);
             }
-            // else no interaction for this cell this cycle!
+            // else no interaction for this cell this cycle.
             return; // Either way
         }
         // else continue with next direction since this direction not in grid.
@@ -207,12 +222,10 @@ function updateWalls() {
      // for each cell...
      for(var i = 0; i < gridSize; i++) {
          var cell = cellData[i];
-         //console.log("updateWalls, cell: " + JSON.stringify(cell));
 
          // for north and west only...
          for(var j = 0; j < directions.length / 2; j++) {
             var direction = directions[j];
-            //console.log("updateWalls, direction: " + JSON.stringify(direction));
 
             var neighborIndex = [
                 cell.index[0] + direction.coord[0], // x
@@ -234,17 +247,6 @@ function updateWalls() {
 }
 
 function wallColor(pctSim) {
-/*    
-    if     (pctSim > .8)                 return "#FFFFFF";
-    else if(pctSim > .6 && pctSim <= .8) return "#BFBFBF";
-    else if(pctSim > .4 && pctSim <= .6) return "#808080";
-    else if(pctSim > .2 && pctSim <= .4) return "#404040";
-    else if(pctSim >= 0 && pctSim <= .2) return "#000000";
-    else return "red";
-*/
-    //if(pctSim < 1e-5)
-        //return '#6F006F';
-
     var color = Math.round(pctSim * 255);
     var color_str = color.toString(16);
     if( color < 16) color_str = '0' + color_str;
@@ -284,7 +286,6 @@ function gridContains(neighbor) {
 }
 
 function round(value) {
-    //return Number(Math.round(value+'e'+2)+'e-'+2);
     return Math.round(value*100)/100;
 }
 
@@ -292,11 +293,10 @@ function round(value) {
 
 var cellData = cellDataFun(); // Data in cell form with x and y postion
 
-gridFun(); // Bind data to Dom, draw walls
+gridFun(); // Bind data to Dom
 
 // Repeat cycle with local feature adoption
 var timer;
-// Repeat cycle until equilibrium reached.
 var timerCnt = 0;
 timer = setInterval(function() {
     if(timerCnt % 100 == 0) console.log("setInterval, timerCnt: " + timerCnt);
@@ -304,7 +304,7 @@ timer = setInterval(function() {
     updateWalls();
     gridFun();
     timerCnt += 1;
-    if(timerCnt > 5000) clearInterval(timer); // TODO: NIX ##############
+    if(timerCnt > 5000) clearInterval(timer);
 }, 50);
 
 
