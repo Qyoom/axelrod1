@@ -2,9 +2,9 @@
 
 // Grid layout dimensions
 var anchorElement = '#grid';
-var numRows = 20;
-var numCols = 20;
-var cellSize = 25;
+var numRows = 15;
+var numCols = 38;
+var cellSize = 18;
 var gridSize = numRows * numCols;
 var marginHoriz = 40;
 var marginVert = 40;
@@ -183,7 +183,12 @@ function interactNeighbor(cell) {
             neighbor = neighbor[0][0].__data__; // TODO: Hack!
 
             // Calculate similarity percentage
-            var pctSim = percentSimilar(cell, neighbor);
+            //var pctSim = percentSimilar(cell, neighbor);
+            //var pctSim = Math.pow((percentSimilar(cell, neighbor)), 2.2);
+            var pctSim = Math.pow((percentSimilar(cell, neighbor)), 2.7);
+            //var pctSim = Math.pow((percentSimilar(cell, neighbor)), 3);
+
+            // Generate random probability
             var prob = Math.random();
 
             // Determine (probability based on similarity) if can interact.
@@ -238,7 +243,7 @@ function wallColor(pctSim) {
     else return "red";
 */
     //if(pctSim < 1e-5)
-        //return '#FF00FF';
+        //return '#6F006F';
 
     var color = Math.round(pctSim * 255);
     var color_str = color.toString(16);
@@ -294,7 +299,7 @@ var timer;
 // Repeat cycle until equilibrium reached.
 var timerCnt = 0;
 timer = setInterval(function() {
-    if(timerCnt % 10 == 0) console.log("setInterval, timerCnt: " + timerCnt);
+    if(timerCnt % 100 == 0) console.log("setInterval, timerCnt: " + timerCnt);
     updateInfluence();
     updateWalls();
     gridFun();
